@@ -1,0 +1,12 @@
+.country {
+    animation: border-appear 1s ease-out;
+}
+
+@keyframes border-appear {
+    0% {
+        fill-opacity: 0.9;
+    }
+    100% {
+        fill-opacity: 0.2;
+    }
+}
