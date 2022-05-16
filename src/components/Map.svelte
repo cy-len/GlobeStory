@@ -4,7 +4,7 @@
     import { onMount } from 'svelte';
     import { browser } from '$app/env';
 
-    let leaflet = null, map = null, bordersLayer = null;
+    let leaflet = null, map = null;
 
     onMount(async () => {
         if (browser) {
@@ -15,7 +15,13 @@
             leaflet.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                 attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
                 minZoom: 2,
-                maxZoom: 11
+                maxZoom: 11,
+                zoomControl: false
+            }).addTo(map);
+            map.zoomControl.remove();
+
+            leaflet.control.zoom({
+                position: 'bottomright'
             }).addTo(map);
         }
     });

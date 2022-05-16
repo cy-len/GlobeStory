@@ -2,7 +2,7 @@
 // @ts-nocheck
 
     import GlobeStoryMap from "../components/GlobeStoryMap.svelte";
-    import DatePanel from "../components/DatePanel.svelte";
+    import "../styles/global.css";
 
     let map;
 
@@ -22,22 +22,8 @@
 </svelte:head>
 
 <main>
-    <DatePanel class="date-panel" on:jump-to-date={jumpToDate} />
     <GlobeStoryMap class="map" bind:this={map} />
 </main>
 
 <style>
-    main {
-        display: grid;
-        grid-template-areas: 'date-panel map';
-        grid-template-columns: 300px 1fr;
-    }
-
-    .date-panel {
-        grid-area: date-panel;
-    }
-
-    .map {
-        grid-area: map;
-    }
 </style>
