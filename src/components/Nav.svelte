@@ -5,10 +5,10 @@
 </script>
 
 <nav class="glass light">
-    <div class="logo">
+    <a href="/" class="logo">
         <span class="material-symbols-outlined">travel_explore</span>
         GlobeStory
-    </div>
+    </a>
 
     <div class="links">
         <a href="/" class:active={currentRoute === "/"}>Map</a>
@@ -35,6 +35,12 @@
         align-items: center;
         font-size: 1.5rem;
         gap: 0.5rem;
+
+        color: black;
+    }
+
+    .logo:hover {
+        text-decoration: none;
     }
 
     .logo span {

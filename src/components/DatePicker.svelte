@@ -67,7 +67,7 @@
     <input class="day-input" type="number" name="day" id={dayId} step="1" min="1" max={selectedMonthMaxDay} bind:value={selectedDay} />
 </form>
 <div class="go">
-    <Button on:click={go} icon="start">Go</Button>
+    <Button on:click={go} icon="update">Go</Button>
 </div>
 
 <style>

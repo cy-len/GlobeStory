@@ -3,6 +3,9 @@
 
     import { onMount } from 'svelte';
     import { browser } from '$app/env';
+    import { createEventDispatcher } from "svelte";
+
+    const dispatch = createEventDispatcher();
 
     let leaflet = null, map = null;
 
@@ -23,12 +26,14 @@
             leaflet.control.zoom({
                 position: 'bottomright'
             }).addTo(map);
+
+            dispatch("ready");
         }
     });
 
     export function addGeoJson(geoJson, generatePopup, generateStyles) {
         if (!leaflet || !map) return;
-
+        
         const layer = leaflet.geoJSON(geoJson, {
             style: generateStyles,
             onEachFeature: (feature, layer) => {

@@ -17,13 +17,16 @@
 
     let map: Map;
 
-    borders.subscribe((bs) => {
-        if (bs.length > 0) {
-            dateStore.subscribe((date: Date) => {
-                displayBorders(date);
-            });
-        }
-    })
+    function init() {
+        borders.subscribe((bs) => {
+            if (bs.length > 0) {
+                dateStore.subscribe((date: Date) => {
+                    displayBorders(date);
+                });
+            }
+        });
+    }
+
 
     const newBorder = (borderData: Border) => {
         const geoJson = {
@@ -45,8 +48,8 @@
     // Feature is a leaflet GeoJson feature
     function countryPopup(feature: GeoJsonBorder) {
         let beginDate = new Date(), endDate = new Date();
-        beginDate.setTime(feature.properties.beginDate.seconds * 1000);
-        endDate.setTime(feature.properties.endDate.seconds * 1000);
+        beginDate.setTime(feature.properties.beginTimestamp * 1000);
+        endDate.setTime(feature.properties.endTimestamp * 1000);
         const popupContent = `
             <h1>${feature.properties.countryName}</h1>
             <h2>Capital: ${feature.properties.capital.name}</h2>
@@ -73,7 +76,7 @@
 
 <div class="gs-map-wrapper">
     <DatePanel />
-    <Map class="{$$props.class}" bind:this={map} />
+    <Map class="{$$props.class}" bind:this={map} on:ready={init} />
 </div>
 
 <style>
