@@ -1,3 +1,49 @@
+:root {
+    --accent-color: rgb(33, 150, 84);
+    --accent-color-darker: rgb(24, 109, 59);
+
+    --transition-speed-fast: 0.25s;
+
+    --nav-height: 3rem;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    height: 100vh;
+}
+
+a {
+    color: gray;
+}
+
+a.active {
+    color: var(--accent-color);
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.glass {
+    backdrop-filter: blur(12px);
+}
+.glass.light {
+    background-color: rgba(255, 255, 255, 0.7);
+}
+.glass.dark {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.map-ui {
+    margin-top: var(--nav-height);
+    max-height: calc(100vh - var(--nav-height));
+    box-sizing: border-box;
 }

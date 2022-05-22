@@ -25,7 +25,7 @@
     }
 </script>
 
-<button on:click={emitToggle} class="date-bg">
+<button on:click={emitToggle} class="date-bg glass dark">
     <div class="year">{ date.getFullYear() }</div>
     <div class="month-day">{ monthNames[date.getMonth()] } { date.getDate() }</div>
 </button>
@@ -38,9 +38,7 @@
         padding: 0.5rem;
         margin: 1rem;
         border-radius: 0.5rem;
-        background-color: rgba(0, 0, 0, 0.7);
         color: white;
-        backdrop-filter: blur(5px);
 
         display: flex;
         flex-direction: column;

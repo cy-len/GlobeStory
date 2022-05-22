@@ -79,5 +79,6 @@
 <style>
     .gs-map-wrapper {
         position: relative;
+        height: 100%;
     }
 </style>
