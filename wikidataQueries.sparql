@@ -1,0 +1,16 @@
+#Battles since 1885 in english
+SELECT ?item ?itemLabel ?itemDescription ?partOf ?partOfLabel ?partOfDescription ?partOfPartOf ?partOfPartOfLabel ?partOfPartOfDescription ?location ?locationLabel ?locationDescription ?locationCoords ?battleCoords ?startDate ?endDate ?participant ?participantLabel ?participantDescription
+WHERE 
+{
+  ?item wdt:P31 wd:Q178561 .
+  ?item wdt:P361 ?partOf .
+  OPTIONAL { ?partOf wdt:P361 ?partOfPartOf . }
+  ?item wdt:P276 ?location .
+  ?location wdt:P625 ?locationCoords .
+  OPTIONAL { ?item wdt:P625 ?battleCoords . }
+  ?item wdt:P580 ?startDate .
+  ?item wdt:P582 ?endDate .
+  OPTIONAL { ?item wdt:P710 ?participant . }
+  FILTER (YEAR(?startDate) > 1885)
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}

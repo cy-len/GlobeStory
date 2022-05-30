@@ -7,6 +7,7 @@
     import type { Border } from "../data/borders";
     import { dateStore } from "../data/stores/dateStore";
     import DatePanel from "./DatePanel.svelte";
+    import LoadingSpinner from "./LoadingSpinner.svelte";
     import "../styles/map.css";
 
     interface GeoJsonBorder {
@@ -17,13 +18,27 @@
 
     let map: Map;
 
+    let loadingParts = {
+        "Map base tiles": false,
+        "Country borders": false,
+    };
+
+    let loading = true;
+
     function init() {
+        loadingParts["Map base tiles"] = true;
         borders.subscribe((bs) => {
             if (bs.length > 0) {
-                dateStore.subscribe((date: Date) => {
-                    displayBorders(date);
-                });
+                loadingParts["Country borders"] = true;
             }
+        });
+    }
+
+    function onLoadingCompleted() {
+        loading = false;
+
+        dateStore.subscribe((date: Date) => {
+            displayBorders(date);
         });
     }
 
@@ -75,6 +90,9 @@
 </script>
 
 <div class="gs-map-wrapper">
+    {#if loading}
+        <LoadingSpinner parts={loadingParts} on:completed={onLoadingCompleted} />
+    {/if}
     <DatePanel />
     <Map class="{$$props.class}" bind:this={map} on:ready={init} />
 </div>

@@ -1,6 +1,11 @@
 <script>
     import Nav from "../components/Nav.svelte";
     import "../styles/global.css";
+
+    // The following code is for upcoming features not yet implemented
+    /* import { processRawBattles } from "../data/events/battles";
+
+    processRawBattles();*/
 </script>
 
 <div class="app-wrapper">

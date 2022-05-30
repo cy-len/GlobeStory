@@ -33,9 +33,6 @@
 
 <style>
     .about {
-        background-image: url("bg.jpg");
-        background-position: center;
-        background-size: cover;
         padding-top: var(--nav-height);
         min-height: 100vh;
         box-sizing: border-box;

@@ -1,4 +1,5 @@
 import { writable } from "svelte/store";
+import type { Subscriber, Unsubscriber } from "svelte/store";
 import { browser } from "$app/env";
 
 export interface BorderProperties {
@@ -29,18 +30,21 @@ function createBorders() {
 
     const loadBorders = async () => {
         if (!browser) return;
+        console.log("Loading borders");
 
-        const response = await fetch("/modifiedCShapes2.json");
+        const response = await fetch("/datasets/modifiedCShapes2.json");
         const json = await response.json();
 
         set(json);
         ready = true;
+        console.log("borders loaded");
     }
 
-    loadBorders();
-
     return {
-        subscribe,
+        subscribe: (run: Subscriber<Border[]>): Unsubscriber => {
+            if (!ready) loadBorders();
+            return subscribe(run);
+        },
 
         ready,
 

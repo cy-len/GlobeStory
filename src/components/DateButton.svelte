@@ -46,6 +46,7 @@
         justify-content: space-between;
 
         cursor: pointer;
+        pointer-events: all;
     }
 
     .date-bg:hover {

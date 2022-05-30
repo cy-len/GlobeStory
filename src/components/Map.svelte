@@ -15,19 +15,20 @@
 
             map = leaflet.map('map').setView([0, 0], 2);
 
-            leaflet.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            const tiles = leaflet.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                 attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
                 minZoom: 2,
                 maxZoom: 11,
                 zoomControl: false
-            }).addTo(map);
+            });
+            tiles.addTo(map);
+            
             map.zoomControl.remove();
-
             leaflet.control.zoom({
                 position: 'bottomright'
             }).addTo(map);
 
-            dispatch("ready");
+            tiles.on("load", () => dispatch("ready"));
         }
     });
 
