@@ -30,14 +30,12 @@ function createBorders() {
 
     const loadBorders = async () => {
         if (!browser) return;
-        console.log("Loading borders");
 
         const response = await fetch("/datasets/modifiedCShapes2.json");
         const json = await response.json();
 
         set(json);
         ready = true;
-        console.log("borders loaded");
     }
 
     return {
