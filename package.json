@@ -21,7 +21,6 @@
   },
   "type": "module",
   "dependencies": {
-    "firebase": "^9.7.0",
     "leaflet": "^1.8.0"
   }
 }
