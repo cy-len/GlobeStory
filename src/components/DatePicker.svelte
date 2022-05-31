@@ -48,6 +48,9 @@
     }
 
     function go() {
+        if (selectedYear > 2019) selectedYear = 2019;
+        else if (selectedYear < 1886) selectedYear = 1886;
+        
         dateStore.set(new Date(selectedYear, selectedMonth.id, selectedDay));
     }
 </script>
