@@ -1,3 +1,7 @@
+.leaflet-control-zoom {
+    margin-top: calc(var(--nav-height) + 10px) !important;
+}
+
 .country {
     animation: border-appear 1s ease-out;
 }
@@ -9,4 +13,31 @@
     100% {
         fill-opacity: 0.2;
     }
+}
+
+.leaflet-div-icon {
+    background: transparent !important;
+    border: none !important;
+}
+
+.custom-marker {
+    width: max-content;
+    border-radius: 0.25rem;
+    border: 1px solid transparent;
+    transform: translate(-50%, -50%);
+
+    transition: 0.5s;
+}
+
+.custom-marker.battle {
+    border-color: rgb(150, 3, 3);
+    background-color: rgba(150, 3, 3, 0.4);
+}
+
+.custom-marker.battle:hover {
+    background-color: rgba(150, 3, 3, 0.9);
+}
+
+.custom-marker .marker-icon {
+    font-size: 2rem;
 }

@@ -21,7 +21,7 @@ interface Location extends ProcessedWikidataItem {
 
 interface Event extends TimedWikidataItem {
     location: Location;
-    coords?: Coordinates; // Coordinates that were directly extracted from the item independently from its location, may be more precise and if set to null we use location.coords as a fallback
+    coords?: Coordinates | null; // Coordinates that were directly extracted from the item independently from its location, may be more precise and if set to null we use location.coords as a fallback
     partOf: ProcessedWikidataItem[];
     participants: ProcessedWikidataItem[];
 };

@@ -8,6 +8,7 @@
     const dispatch = createEventDispatcher();
 
     let leaflet = null, map = null;
+    const layerGroups = {};
 
     onMount(async () => {
         if (browser) {
@@ -25,7 +26,7 @@
             
             map.zoomControl.remove();
             leaflet.control.zoom({
-                position: 'bottomright'
+                position: 'topright'
             }).addTo(map);
 
             tiles.on("load", () => dispatch("ready"));
@@ -44,7 +45,30 @@
         });
         layer.addTo(map);
 
-        return layer
+        return layer;
+    }
+
+    export function addMarker(coords, icon, clickCallback, layerGroupName = "default") {
+        if (!leaflet || !map) return;
+
+        const marker = leaflet.marker(coords, icon ? {icon: leaflet.divIcon({html: icon})} : {});
+
+        marker.on("click", clickCallback);
+
+        if (!layerGroups[layerGroupName]) {
+            const layer = leaflet.layerGroup();
+            layer.addTo(map);
+            layerGroups[layerGroupName] = layer;
+        }
+
+        marker.addTo(layerGroups[layerGroupName]);
+
+        return marker;
+    }
+
+    export function clearLayer(layerGroupName) {
+        if (!layerGroups[layerGroupName]) return;
+        layerGroups[layerGroupName].clearLayers();
     }
 </script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin=""/>

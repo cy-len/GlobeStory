@@ -10,7 +10,7 @@
     }
 </script>
 
-<button on:click|preventDefault={dispatchClick}>
+<button class="{$$props.class}" on:click|preventDefault={dispatchClick}>
     <span class="material-symbols-outlined">{ icon }</span> 
     <span><slot /></span>
 </button>

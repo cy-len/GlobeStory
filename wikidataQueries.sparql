@@ -1,9 +1,11 @@
 #Battles since 1885 in english
-SELECT ?item ?itemLabel ?itemDescription ?partOf ?partOfLabel ?partOfDescription ?partOfPartOf ?partOfPartOfLabel ?partOfPartOfDescription ?location ?locationLabel ?locationDescription ?locationCoords ?battleCoords ?startDate ?endDate ?participant ?participantLabel ?participantDescription
+SELECT ?item ?itemLabel ?itemDescription ?image ?conflict ?conflictLabel ?partOf ?partOfLabel ?partOfDescription ?partOfPartOf ?partOfPartOfLabel ?partOfPartOfDescription ?location ?locationLabel ?locationDescription ?locationCoords ?battleCoords ?startDate ?endDate ?participant ?participantLabel ?participantDescription
 WHERE 
 {
   ?item wdt:P31 wd:Q178561 .
   ?item wdt:P361 ?partOf .
+  ?item wdt:P18 ?image .
+  OPTIONAL { ?item wdt:P607 ?conflict . }
   OPTIONAL { ?partOf wdt:P361 ?partOfPartOf . }
   ?item wdt:P276 ?location .
   ?location wdt:P625 ?locationCoords .

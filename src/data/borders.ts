@@ -46,7 +46,7 @@ function createBorders() {
 
         ready,
 
-        getBordersFromDate(d: Date): Promise<Border[]> {
+        getBordersFromDate: (d: Date): Promise<Border[]> => {
             const timeSeconds = d.getTime() / 1000;
             return new Promise((resolve) => {
                 let filtered: Border[] = [];

@@ -1,69 +1,55 @@
 import { writable } from "svelte/store";
 import { browser } from "$app/env";
-import { urlToId, pointToCoords } from "./wikidata";
 import type { ProcessedWikidataItem, TimedWikidataItem, Event } from "./wikidata";
-
-interface WikidataRawBattleEntry {
-    item: string;
-    itemLabel: string;
-    itemDescription?: string;
-    image?: string;
-    partOf: string;
-    partOfLabel: string;
-    partOfDescription: string;
-    partOfPartOf?: string;
-    partOfPartOfLabel?: string;
-    partOfPartOfDescription: string;
-    location: string;
-    locationLabel: string;
-    locationCoords: string;
-    locationDescription: string;
-    battleCoords?: string;
-    startDate: string;
-    endDate: string;
-    participant?: string;
-    participantDescription?: string;
-    participantLabel?: string;
-    conflict?: string;
-    conflictLabel?: string;
-}
-
 export interface Battle extends Event {
-    conflict?: ProcessedWikidataItem;
+    conflict?: ProcessedWikidataItem | null;
 }
 
 type BattleCollection = { [key: string]: Battle };
 
-/* function createBorders() {
-    const { subscribe, set } = writable([] as Border[]);
+function createBattles() {
+    const { subscribe, set } = writable({} as BattleCollection);
 
     let ready = false;
 
-    const loadBorders = async () => {
+    const loadBattles = async () => {
         if (!browser) return;
 
-        const response = await fetch("/datasets/rawWikidataBattles_may22.json");
+        const response = await fetch("/datasets/battles_june22.json");
         const json = await response.json();
 
         set(json);
         ready = true;
     }
 
-    loadBorders();
+    const isBattleAtTimestamp = (timeSeconds: number, b: Battle): boolean => {
+        const flattenedStart = new Date(b.startTimestamp * 1000); // For now, care only about the day, not about the time
+        flattenedStart.setHours(0);
+        flattenedStart.setMinutes(0);
+        flattenedStart.setSeconds(0);
+        const flattenedStartTimestamp = flattenedStart.getTime() / 1000;
+        const end = b.endTimestamp ? b.endTimestamp : flattenedStartTimestamp + 86364; // + almost a day
+
+        return (flattenedStartTimestamp <= timeSeconds && end >= timeSeconds);
+    }
+
+    loadBattles();
 
     return {
         subscribe,
 
         ready,
 
-        getBordersFromDate(d: Date): Promise<Border[]> {
+        getBattlesFromDate(d: Date): Promise<BattleCollection> {
             const timeSeconds = d.getTime() / 1000;
             return new Promise((resolve) => {
-                let filtered: Border[] = [];
-        
+                let filtered: BattleCollection = {};
+                
                 const unsub = subscribe((bs) => {
-                    filtered = bs.filter((b: Border) => {
-                        return b.properties.beginTimestamp <= timeSeconds && b.properties.endTimestamp >= timeSeconds;
+                    Object.values(bs).forEach((b: Battle) => {
+                        if (isBattleAtTimestamp(timeSeconds, b)) {
+                            filtered[b.id] = b;
+                        }
                     });
         
                 });
@@ -71,112 +57,45 @@ type BattleCollection = { [key: string]: Battle };
                 unsub();
                 resolve(filtered);
             });
-        }
-    }
-}
+        },
 
-export const borders = createBorders(); */
+        getBattlesAroundDate(d: Date, numBefore: number, numAfter: number): Promise<Battle[]> {
+            const timeSeconds = d.getTime() / 1000;
+            return new Promise((resolve) => {
+                let battles: Battle[] = [];
+                const unsub = subscribe((bs) => {
+                    const asArray = Object.values(bs);
 
-export const processRawBattles = async function () {
-    if (!browser) return;
+                    // Battles before the target date, sorted from closest to farthest (descending order)
+                    const battlesBefore = asArray.filter((b: Battle) => {
+                        const end = b.endTimestamp ?? b.startTimestamp;
+                        return end < timeSeconds;
+                    }).sort((a: Battle, b: Battle): number => {
+                        return (b.endTimestamp ?? b.startTimestamp) - (a.endTimestamp ?? a.startTimestamp);
+                    });
+                    // Battles after the target date, sorted from closest to farthest (ascending order)
+                    const battlesAfter = asArray.filter((b: Battle) => {
+                        return b.startTimestamp > (timeSeconds + 86364); // almost a day
+                    }).sort((a: Battle, b: Battle): number => {
+                        return a.startTimestamp - b.startTimestamp;
+                    });
 
-    const raw = await fetch("/datasets/rawWikidataBattles_may22.json");
-    const rawBattles: WikidataRawBattleEntry[] = await raw.json();
+                    const battleDuring = asArray.filter((b: Battle) => {
+                        return isBattleAtTimestamp(timeSeconds, b);
+                    });
 
-    const groupedRawBattles: { [key: string]: WikidataRawBattleEntry[] } = {};
-
-    for (let rb of rawBattles) {
-        if (groupedRawBattles[rb.item]) {
-            groupedRawBattles[rb.item].push(rb);
-        } else {
-            groupedRawBattles[rb.item] = [rb];
-        }
-    }
-    
-    const battles: BattleCollection = {};
-    for (let rawId in groupedRawBattles) {
-        const rbs = groupedRawBattles[rawId];
-        const rb = rbs[0];
-        if (urlToId(rawId) === 16470) {
-            console.log(rbs);
-        }
-
-        const partOf: { [key: string]: ProcessedWikidataItem } = {};
-        for (let partOfCandidate of rbs) {
-            const poid = urlToId(partOfCandidate.partOf);
-            if (!partOf[poid]) {
-                partOf[poid] = {
-                    id: poid,
-                    name: partOfCandidate.partOfLabel,
-                    description: partOfCandidate.partOfDescription
-                };
-            }
-
-            if (partOfCandidate.partOfPartOf) {
-                const popoid = urlToId(partOfCandidate.partOfPartOf)
-                if (!partOf[popoid]) {
-                    partOf[popoid] = {
-                        id: popoid,
-                        name: partOfCandidate.partOfPartOfLabel,
-                        description: partOfCandidate.partOfPartOfDescription
-                    };
-                }
-            }
-        }
-
-        const participants: { [key: string]: ProcessedWikidataItem } = {};
-        for (let participantsCandidate of rbs) {
-            if (participantsCandidate.participant) {
-                const pid = urlToId(participantsCandidate.participant);
-                if (!participants[pid]) {
-                    participants[pid] = {
-                        id: pid,
-                        name: participantsCandidate.participantLabel,
-                        description: participantsCandidate.participantDescription
-                    };
-                }
-            }
-        }
-
-        const images: { [key: string]: boolean } = {};
-        for (let imageCandidate of rbs) {
-            if (imageCandidate.image) {
-                if (!images[imageCandidate.image]) {
-                    images[imageCandidate.image] = true;
-                }
-            }
-        }
+                    battles = [
+                        ...battlesBefore.slice(0, Math.min(numBefore, battlesBefore.length)),
+                        ...battleDuring,
+                        ...battlesAfter.slice(0, Math.min(numAfter, battlesAfter.length))
+                    ]
+                });
         
-
-        const id = urlToId(rb.item);
-        const startDate = new Date(rb.startDate);
-        const endDate = new Date(rb.endDate);
-        const battle: Battle = {
-            id: id,
-            name: rb.itemLabel,
-            description: rb.itemDescription,
-            images: Object.keys(images),
-            location: {
-                id: urlToId(rb.location),
-                name: rb.locationLabel,
-                description: rb.locationDescription,
-                coords: pointToCoords(rb.locationCoords)
-            },
-            coords: rb.battleCoords ? pointToCoords(rb.battleCoords) : null,
-            partOf: Object.values(partOf),
-            startTimestamp: startDate.getTime() / 1000, // Seconds instead of milliseconds
-            endTimestamp:endDate.getTime() / 1000,
-            participants: Object.values(participants),
-            conflict: rb.conflict ? {
-                id: urlToId(rb.conflict),
-                name: rb.conflictLabel,
-            } : null,
-        };
-
-        battles[id] = battle;
+                unsub();
+                resolve(battles);
+            });
+        }
     }
-
-    console.log(battles);
-    console.log(Object.keys(battles).length);
-    console.log(battles[16470]);
 }
+
+export const battles = createBattles();

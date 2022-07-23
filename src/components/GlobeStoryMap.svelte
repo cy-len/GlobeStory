@@ -5,10 +5,15 @@
     import { BordersSnapshot } from "../data/mapUtils/bordersSnapshot";
     import type { BorderSnapshot } from "../data/mapUtils/bordersSnapshot";
     import type { Border } from "../data/borders";
+    import { battles } from "../data/events/battles";
+    import type { Battle } from "../data/events/battles";
+    import type { Event } from "../data/events/wikidata";
     import { dateStore } from "../data/stores/dateStore";
-    import DatePanel from "./DatePanel.svelte";
+    import DatePanel from "./DatePanel/DatePanel.svelte";
     import LoadingSpinner from "./LoadingSpinner.svelte";
     import "../styles/map.css";
+    import EventModal from "./EventModal.svelte";
+    import TimelinePanel from "./Timeline/TimelinePanel.svelte";
 
     interface GeoJsonBorder {
         type: string;
@@ -21,9 +26,16 @@
     let loadingParts = {
         "Map base tiles": false,
         "Country borders": false,
+        "Battles": false,
     };
 
     let loading = true;
+
+    let eventModal: EventModal;
+
+    const divIcons = {
+        "battle": `<div class="custom-marker battle"><span class="material-symbols-outlined marker-icon">swords</span></div>`
+    };
 
     function init() {
         loadingParts["Map base tiles"] = true;
@@ -32,13 +44,19 @@
                 loadingParts["Country borders"] = true;
             }
         });
+        battles.subscribe((bs) => {
+            if (Object.entries(bs).length > 0) {
+                loadingParts["Battles"] = true;
+            }
+        });
     }
 
     function onLoadingCompleted() {
         loading = false;
 
-        dateStore.subscribe((date: Date) => {
-            displayBorders(date);
+        dateStore.subscribe(async (date: Date) => {
+            await displayBorders(date);
+            await displayBattles(date);
         });
     }
 
@@ -87,6 +105,21 @@
         const rawBorders = await borders.getBordersFromDate(date);
         currentBorders.mergeWithBordersList(rawBorders);
     }
+
+    export async function displayBattles(date: Date) {
+        map.clearLayer("battles");
+        const bs = await battles.getBattlesFromDate(date);
+        Object.values(bs).forEach((battle) => {
+            const coords = battle.coords ? [battle.coords.latitude, battle.coords.longitude] : [battle.location.coords.latitude, battle.location.coords.longitude];
+            map.addMarker(coords, divIcons.battle, () => {
+                displayEventDetail(battle);
+            }, "battles");
+        });
+    }
+
+    function displayEventDetail(event: Battle) {
+        eventModal.show(event);
+    }
 </script>
 
 <div class="gs-map-wrapper">
@@ -94,12 +127,15 @@
         <LoadingSpinner parts={loadingParts} on:completed={onLoadingCompleted} />
     {/if}
     <DatePanel />
+    <TimelinePanel on:display-event={(event) => displayEventDetail(event.detail.event)} />
     <Map class="{$$props.class}" bind:this={map} on:ready={init} />
+    <EventModal bind:this={eventModal} />
 </div>
 
 <style>
     .gs-map-wrapper {
         position: relative;
         height: 100%;
+        overflow: hidden;
     }
 </style>
